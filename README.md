@@ -1,4 +1,104 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Smart Sentry
+
+A React Native app for personal safety and emergency management, featuring stylish authentication screens and MongoDB backend.
+
+## Features
+
+- **Stylish Authentication**: Beautiful login and register screens with animations, gradients, and professional UI
+- **Profile Management**: User registration with profile picture selection from gallery
+- **Backend Integration**: Node.js/Express server with MongoDB for data persistence
+- **JWT Authentication**: Secure token-based authentication
+- **Emergency Features**: SOS functionality and trusted contacts management
+- **Cross-Platform**: Works on both Android and iOS
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- React Native development environment
+- MongoDB (local or Atlas)
+- Android Studio (for Android development)
+- Xcode (for iOS development, macOS only)
+
+## Installation
+
+1. Clone the repository and install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Install iOS dependencies (macOS only):
+   ```bash
+   cd ios && bundle exec pod install
+   ```
+
+3. Set up the backend (see backend README):
+   ```bash
+   cd smartsensrty-backend
+   npm install
+   npm start
+   ```
+
+## Running the App
+
+### Start Metro Bundler
+```bash
+npm start
+```
+
+### Android
+```bash
+npm run android
+```
+
+### iOS
+```bash
+npm run ios
+```
+
+## Backend Setup
+
+The app requires a backend server for authentication and data storage. See `smartsensrty-backend/README.md` for detailed setup instructions.
+
+### For Physical Device Testing
+
+Update `src/services/api.js` with your computer's local IP:
+```javascript
+const BASE_URL = 'http://YOUR_LOCAL_IP:5000/api';
+```
+
+## Enhanced Features
+
+### Login Screen
+- Animated shield logo with pulsing effects
+- Email/password input with icons
+- Remember Me checkbox
+- Forgot Password link
+- Social login buttons (Google, Facebook, Apple)
+- Gradient backgrounds and smooth animations
+
+### Register Screen
+- Profile picture selection from gallery
+- Full user information collection (name, email, phone, address)
+- Professional form design with validation
+- Animated UI elements
+
+### Backend Features
+- User registration and authentication
+- Password hashing with bcrypt
+- JWT token generation
+- MongoDB data storage
+- Profile image support
+- RESTful API endpoints
+
+## Original React Native Setup
+
+This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+
+> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+
+## Troubleshooting
+
+If you're having issues, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
 
 # Getting Started
 
