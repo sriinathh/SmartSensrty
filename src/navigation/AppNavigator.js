@@ -9,12 +9,16 @@ import ServicesScreen from '../screens/ServicesScreen';
 import TrustedContactsScreen from '../screens/TrustedContactsScreen';
 import EmergencyHistoryScreen from '../screens/EmergencyHistoryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
+import PermissionsScreen from '../screens/PermissionsScreen';
 import { authAPI } from '../services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [isOnboarded, setIsOnboarded] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,9 +28,12 @@ export default function AppNavigator() {
   const checkAuthentication = async () => {
     try {
       const token = await authAPI.loadToken();
+      const onboardingCompleted = await AsyncStorage.getItem('onboardingCompleted');
       setIsAuthenticated(!!token);
+      setIsOnboarded(!!onboardingCompleted);
     } catch (error) {
       setIsAuthenticated(false);
+      setIsOnboarded(false);
     } finally {
       setIsLoading(false);
     }
@@ -43,15 +50,28 @@ export default function AppNavigator() {
         {isAuthenticated ? (
           // Authenticated screens
           <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Services" component={ServicesScreen} />
-            <Stack.Screen name="Contacts" component={TrustedContactsScreen} />
-            <Stack.Screen name="History" component={EmergencyHistoryScreen} />
-            <Stack.Screen 
-              name="Profile" 
-              component={ProfileScreen} 
-              initialParams={{ setAuthenticated: setIsAuthenticated }}
-            />
+            {!isOnboarded ? (
+              <>
+                <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+                <Stack.Screen 
+                  name="Permissions" 
+                  component={PermissionsScreen} 
+                  initialParams={{ setIsOnboarded: setIsOnboarded }}
+                />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Home" component={HomeScreen} />
+                <Stack.Screen name="Services" component={ServicesScreen} />
+                <Stack.Screen name="Contacts" component={TrustedContactsScreen} />
+                <Stack.Screen name="History" component={EmergencyHistoryScreen} />
+                <Stack.Screen 
+                  name="Profile" 
+                  component={ProfileScreen} 
+                  initialParams={{ setAuthenticated: setIsAuthenticated }}
+                />
+              </>
+            )}
           </>
         ) : (
           // Unauthenticated screens

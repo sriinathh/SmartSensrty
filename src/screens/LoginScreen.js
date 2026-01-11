@@ -34,6 +34,9 @@ export default function LoginScreen({ navigation, route }) {
   const slideAnim = useRef(new Animated.Value(50)).current;
   const logoScale = useRef(new Animated.Value(0.8)).current;
   const glowOpacity = useRef(new Animated.Value(0.3)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.parallel([
@@ -47,29 +50,68 @@ export default function LoginScreen({ navigation, route }) {
         duration: 500,
         useNativeDriver: true,
       }),
-      Animated.timing(logoScale, {
+      Animated.spring(logoScale, {
         toValue: 1,
-        duration: 700,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+      Animated.spring(bounceAnim, {
+        toValue: 1,
+        friction: 3,
         useNativeDriver: true,
       }),
     ]).start();
 
-    // Pulsing glow effect
-    const pulseGlow = Animated.loop(
+    // Pulsing glow effect (removed as per user request)
+    // const pulseGlow = Animated.loop(
+    //   Animated.sequence([
+    //     Animated.timing(glowOpacity, {
+    //       toValue: 0.8,
+    //       duration: 1500,
+    //       useNativeDriver: true,
+    //     }),
+    //     Animated.timing(glowOpacity, {
+    //       toValue: 0.3,
+    //       duration: 1500,
+    //       useNativeDriver: true,
+    //     }),
+    //   ])
+    // );
+    // pulseGlow.start();
+
+    // Rotating logo
+    const rotateLogo = Animated.loop(
       Animated.sequence([
-        Animated.timing(glowOpacity, {
-          toValue: 0.8,
-          duration: 1500,
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 2000,
           useNativeDriver: true,
         }),
-        Animated.timing(glowOpacity, {
-          toValue: 0.3,
-          duration: 1500,
+        Animated.timing(rotateAnim, {
+          toValue: 0,
+          duration: 2000,
           useNativeDriver: true,
         }),
       ])
     );
-    pulseGlow.start();
+    rotateLogo.start();
+
+    // Floating header
+    const floatHeader = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: -10,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    floatHeader.start();
   }, []);
 
   const handleLogin = async () => {
@@ -89,6 +131,13 @@ export default function LoginScreen({ navigation, route }) {
         // Update authentication state
         if (setAuthenticated) {
           setAuthenticated(true);
+        }
+        // Check onboarding status
+        const onboardingCompleted = await AsyncStorage.getItem('onboardingCompleted');
+        if (onboardingCompleted) {
+          navigation.navigate('Home'); // Assuming HomeScreen route is 'Home'
+        } else {
+          navigation.navigate('Onboarding');
         }
       }
     } catch (error) {
@@ -111,7 +160,7 @@ export default function LoginScreen({ navigation, route }) {
         style={styles.background}
       >
         {/* Header Wave Section */}
-        <View style={styles.headerContainer}>
+        <Animated.View style={[styles.headerContainer, { transform: [{ translateY: floatAnim }] }]}>
           <LinearGradient
             colors={['#4BCFA6', '#18716A', '#0F4D5F']}
             start={{ x: 0, y: 0 }}
@@ -123,7 +172,10 @@ export default function LoginScreen({ navigation, route }) {
                 styles.logoContainer,
                 {
                   opacity: fadeAnim,
-                  transform: [{ scale: logoScale }],
+                  transform: [
+                    { scale: logoScale },
+                    { rotate: rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '5deg'] }) }
+                  ],
                 },
               ]}
             >
@@ -137,7 +189,7 @@ export default function LoginScreen({ navigation, route }) {
               <Text style={styles.appName}>Smart Sentry</Text>
             </Animated.View>
           </LinearGradient>
-        </View>
+        </Animated.View>
 
         {/* Main Content */}
         <KeyboardAvoidingView
@@ -153,7 +205,10 @@ export default function LoginScreen({ navigation, route }) {
                 styles.formCard,
                 {
                   opacity: fadeAnim,
-                  transform: [{ translateY: slideAnim }],
+                  transform: [
+                    { translateY: slideAnim },
+                    { scale: bounceAnim }
+                  ],
                 },
               ]}
             >
@@ -288,13 +343,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: '#4BCFA6',
-    opacity: 0.3,
-    shadowColor: '#4BCFA6',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 10,
+    backgroundColor: 'transparent',
+    opacity: 0,
   },
   appName: {
     fontSize: 24,

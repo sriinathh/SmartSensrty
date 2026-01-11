@@ -98,12 +98,6 @@ export default function RegisterScreen({ navigation, route }) {
         // Registration successful and user is logged in
         if (setAuthenticated) {
           setAuthenticated(true);
-        } else {
-          // Fallback navigation
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          });
         }
       }
     } catch (error) {
