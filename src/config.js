@@ -8,9 +8,10 @@ const RENDER_BACKEND = 'https://smartsensrty-backend.onrender.com';
 const ENV_API_BASE = process.env.API_BASE_URL;
 
 // Determine BASE_URL used by frontend API calls
+// Use __DEV__ so release builds (where __DEV__ is false) point to production backend
 export const BASE_URL =
   ENV_API_BASE ||
-  (process.env.NODE_ENV === 'production'
+  (!__DEV__
     ? `${RENDER_BACKEND}/api`
     : Platform.OS === 'android'
     ? 'http://192.168.1.4:5000/api' // Use correct host LAN IP for Android emulator
