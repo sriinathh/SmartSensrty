@@ -1,5 +1,6 @@
 # Smart Sentry
-<p align="center"> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.52_bae5be.jpg" width="220" /> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.53_sxcefj.jpg" width="220" /> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.54_1_gbb4y5.jpg" width="220" /> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.39.57_wuobtl.jpg" width="220" /> </p>
+<p align="center"> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.52_bae5be.jpg" width="220" /> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.53_sxcefj.jpg" width="220" /> 
+   <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.33.54_1_gbb4y5.jpg" width="220" /> <img src="https://res.cloudinary.com/notes1/image/upload/WhatsApp_Image_2026-02-13_at_00.39.57_wuobtl.jpg" width="220" /> </p>
 A React Native app for personal safety and emergency management, featuring stylish authentication screens and MongoDB backend.
 
 ## Features
