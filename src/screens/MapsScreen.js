@@ -35,8 +35,6 @@ export default function MapsScreen({ navigation }) {
   const [userLocation, setUserLocation] = useState(null);
   const [offline, setOffline] = useState(false);
   const [isMapReady, setIsMapReady] = useState(false);
-  const [satelliteMapReady, setSatelliteMapReady] = useState(false);
-  const [showCoordinates, setShowCoordinates] = useState(true);
   
   // Emergency/Offline features
   const [showPOIList, setShowPOIList] = useState(false);
@@ -59,22 +57,25 @@ export default function MapsScreen({ navigation }) {
   }, []);
 
   const initializeOfflineSystems = async () => {
-    // Initialize offline emergency data
-    await OfflineEmergencyDataManager.initialize();
-    
-    // Initialize offline cache manager
-    await OfflineCacheManager.ensureInitialPack();
-    
-    // Initialize satellite map provider and pre-cache region
-    await OfflineSatelliteMapProvider.preCacheSatelliteRegion('bengaluru', 13);
-    setSatelliteMapReady(true);
-    
-    // Subscribe to offline status
-    const unsubscribe = OfflineCacheManager.subscribeToStatus((status) => {
-      setOffline(!status.isOnline);
-    });
+    try {
+      // Initialize offline emergency data
+      await OfflineEmergencyDataManager.initialize();
+      
+      // Initialize offline cache manager
+      await OfflineCacheManager.ensureInitialPack();
+      
+      // Initialize satellite map provider and pre-cache region
+      await OfflineSatelliteMapProvider.preCacheSatelliteRegion('bengaluru', 13);
+      
+      // Subscribe to offline status
+      const unsubscribe = OfflineCacheManager.subscribeToStatus((status) => {
+        setOffline(!status.isOnline);
+      });
 
-    return unsubscribe;
+      return unsubscribe;
+    } catch (err) {
+      console.warn('Offline systems initialization error:', err);
+    }
   };
 
   // Main location tracking subscription
@@ -238,15 +239,13 @@ export default function MapsScreen({ navigation }) {
               
               {/* Emergency mode pulse ring */}
               {emergencyMode && (
-                <Animated.View>
-                  <Circle
-                    center={{ latitude: userLocation.latitude, longitude: userLocation.longitude }}
-                    radius={(userLocation.accuracy || 30) * 2}
-                    fillColor="rgba(255, 59, 48, 0.08)"
-                    strokeColor="rgba(255, 59, 48, 0.3)"
-                    strokeWidth={2}
-                  />
-                </Animated.View>
+                <Circle
+                  center={{ latitude: userLocation.latitude, longitude: userLocation.longitude }}
+                  radius={(userLocation.accuracy || 30) * 2}
+                  fillColor="rgba(255, 59, 48, 0.08)"
+                  strokeColor="rgba(255, 59, 48, 0.3)"
+                  strokeWidth={2}
+                />
               )}
               
               {/* User position marker */}
