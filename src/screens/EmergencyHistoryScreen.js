@@ -15,6 +15,7 @@ import {
   ScrollView,
   Linking,
   Dimensions,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MapView, { Marker, Circle } from 'react-native-maps';
@@ -172,39 +173,48 @@ export default function EmergencyHistoryScreen({ navigation }) {
       }
       
       // Fetch from API
+      console.log('📡 Fetching SOS history from API...');
       const response = await sosAPI.getHistory(50, pagination.page);
       
-      if (response.success) {
-        setData(response.data);
+      if (response && response.success) {
+        console.log(`✅ SOS history loaded: ${response.data?.length || 0} items`);
+        setData(response.data || []);
         setPagination({
-          page: response.pagination.page,
-          totalPages: response.pagination.pages,
-          total: response.pagination.total,
+          page: response.pagination?.page || 1,
+          totalPages: response.pagination?.pages || 1,
+          total: response.pagination?.total || 0,
         });
         setIsOffline(false);
         
         // Cache the data locally
-        await saveToLocalStorage(response.data);
+        await saveToLocalStorage(response.data || []);
 
         // Reset animations for new data
         anims.length = 0;
-        response.data.forEach(() => {
+        (response.data || []).forEach(() => {
           anims.push(new Animated.Value(0));
         });
 
         // Animate items
-        if (response.data.length > 0) {
+        if (response.data?.length > 0) {
           Animated.stagger(90, anims.map(a => Animated.timing(a, { toValue: 1, duration: 420, useNativeDriver: true }))).start();
         }
       } else {
-        throw new Error('Failed to load history');
+        console.warn('⚠️ API response missing success flag or data');
+        throw new Error('Invalid API response - server returned: ' + JSON.stringify(response).substring(0, 100));
       }
     } catch (err) {
-      console.error('Error fetching SOS history:', err);
+      const errorMsg = err?.message || 'Failed to load emergency history';
+      console.error('❌ Error fetching SOS history:', {
+        message: errorMsg,
+        error: err,
+        timestamp: new Date().toISOString(),
+      });
       
       // If API fails, try to use cached data
       const cachedResult = await loadFromLocalStorage();
       if (cachedResult && cachedResult.data?.length > 0) {
+        console.log('📦 Using cached data as fallback');
         setData(cachedResult.data);
         if (cachedResult.pagination) {
           setPagination(cachedResult.pagination);
@@ -212,7 +222,16 @@ export default function EmergencyHistoryScreen({ navigation }) {
         setIsOffline(true);
         setError(null); // Clear error since we have cached data
       } else {
-        setError(err.message || 'Failed to load emergency history');
+        // Provide more helpful error message
+        let displayError = errorMsg;
+        if (errorMsg.includes('404') || errorMsg.includes('Cannot GET')) {
+          displayError = '❌ API endpoint not found. Backend may not be deployed correctly.';
+        } else if (errorMsg.includes('401') || errorMsg.includes('Authentication')) {
+          displayError = '❌ Authentication failed. Please login again.';
+        } else if (errorMsg.includes('Network error') || errorMsg.includes('timeout')) {
+          displayError = '❌ Network error. Check your internet connection and Render deployment status.';
+        }
+        setError(displayError);
       }
     } finally {
       setLoading(false);
@@ -229,6 +248,31 @@ export default function EmergencyHistoryScreen({ navigation }) {
     setRefreshing(true);
     fetchHistory(true);
   }, [fetchHistory]);
+
+  const testAPIConnection = useCallback(async () => {
+    console.log('🧪 Testing API connection...');
+    try {
+      Alert.alert('Testing', 'Attempting to connect to SOS API...');
+      const response = await sosAPI.getHistory(1, 1);
+      console.log('✅ API Test Result:', response);
+      Alert.alert(
+        'API Connection Successful',
+        `Status: ${response.success ? 'OK' : 'FAILED'}\n` +
+        `Items: ${response.data?.length || 0}\n` +
+        `Total: ${response.pagination?.total || 0}`
+      );
+    } catch (error) {
+      console.error('❌ API Test Failed:', error);
+      Alert.alert(
+        'API Connection Failed',
+        `Error: ${error.message}\n\nMake sure:\n` +
+        `1. Render backend is deployed\n` +
+        `2. JWT_SECRET env var is set\n` +
+        `3. MongoDB is connected\n` +
+        `4. You are logged in`
+      );
+    }
+  }, []);
 
   const handleDetailsPress = (item) => {
     setSelectedEmergency(item);
@@ -601,6 +645,9 @@ export default function EmergencyHistoryScreen({ navigation }) {
           <TouchableOpacity onPress={onRefresh} disabled={refreshing} style={styles.refreshBtn}>
             <Icon name="refresh" size={20} color={refreshing ? '#9CA3AF' : '#2E5090'} />
           </TouchableOpacity>
+          <TouchableOpacity onPress={testAPIConnection} style={styles.testBtn} title="Test API">
+            <Icon name="bug-check" size={20} color="#2E5090" />
+          </TouchableOpacity>
         </View>
 
         {/* Content */}
@@ -718,6 +765,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   refreshBtn: {
+    padding: 8,
+  },
+  testBtn: {
     padding: 8,
   },
   list: {
