@@ -1,87 +1,55 @@
-# Smart Sentry Backend
+# SmartSensrty Backend
 
-A Node.js backend for the Smart Sentry React Native app, providing authentication and user management with MongoDB.
+Quick notes to run, deploy, and prepare this backend for use with the Expo app.
 
-## Features
+## Local run
 
-- User registration and login with JWT authentication
-- Password hashing with bcrypt
-- MongoDB for data storage
-- Profile image support
-- CORS enabled for mobile app
+1. Create `.env` in this folder with at least:
 
-## Prerequisites
+```
+MONGODB_URI=mongodb://127.0.0.1:27017/smartsensrty
+JWT_SECRET=your_jwt_secret
+FRONTEND_URL=http://localhost:19006   # or your frontend URL
+ALLOW_ALL_ORIGINS=false               # set true for quick device testing
+```
 
-- Node.js (v14 or higher)
-- MongoDB (local installation or MongoDB Atlas)
-- npm or yarn
+2. Install and start:
 
-## Installation
+```bash
+npm install
+npm run dev   # nodemon or
+npm start
+```
 
-1. Navigate to the backend directory:
-   ```bash
-   cd smartsensrty-backend
-   ```
+3. Server listens on `PORT` env or 5000 by default. Use `0.0.0.0` host when testing from device.
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+## CORS
 
-3. Create a `.env` file in the root directory with the following variables:
-   ```
-   MONGODB_URI=mongodb://127.0.0.1:27017/smartsensrty
-   JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-   PORT=5000
-   ```
+This project supports a permissive toggle. For quick local device testing you can set `ALLOW_ALL_ORIGINS=true`. For production, set `FRONTEND_URL` to your frontend host and keep `ALLOW_ALL_ORIGINS=false`.
 
-4. Start MongoDB service (if using local MongoDB):
-   ```bash
-   # On Windows
-   net start MongoDB
-   # Or start mongod directly
-   mongod
-   ```
+## Deploy
 
-5. Start the server:
-   ```bash
-   npm start
-   # Or for development with auto-restart
-   npm run dev
-   ```
+You can deploy to Render, Railway, Heroku or any Node host. Example (Render):
 
-The server will run on `http://localhost:5000`
+- Create a new web service on Render, connect the repo, set `env` variables (MONGODB_URI, JWT_SECRET, FRONTEND_URL), and set the start command to `npm start`.
 
-## API Endpoints
+## Git and pushing
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
+If you want to push this backend to GitHub:
 
-### User Profile
-- `GET /api/profile` - Get user profile (requires auth)
+```bash
+cd smartsensrty-backend
+git init
+git add .
+git commit -m "backend: add CORS toggle and README"
+# create repo on GitHub, then:
+git remote add origin <your-github-repo-url>
+git push -u origin main
+```
 
-### Contacts (Placeholder)
-- `GET /api/contacts` - Get user contacts
-- `POST /api/contacts` - Add contact
+## Expo / APK notes
 
-### SOS (Placeholder)
-- `POST /api/sos/start` - Log emergency
+- Once deployed, grab the HTTPS URL (e.g. `https://your-backend.onrender.com`) and paste it into the Expo app's config (`src/config.js` or wherever `api.js` points) as the backend base URL.
+- For Expo-managed builds use EAS or `expo build:android -t apk` (depending on your Expo SDK and account). Ensure the backend URL is accessible over HTTPS for production.
 
-## Testing on Physical Device
-
-For testing on a physical Android/iOS device:
-
-1. Find your computer's local IP address
-2. Update `src/services/api.js` BASE_URL to use your IP:
-   ```javascript
-   const BASE_URL = 'http://YOUR_LOCAL_IP:5000/api';
-   ```
-3. Make sure your device and computer are on the same Wi-Fi network
-4. Ensure firewall allows connections on port 5000
-
-## Environment Variables
-
-- `MONGODB_URI` - MongoDB connection string
-- `JWT_SECRET` - Secret key for JWT signing
-- `PORT` - Server port (default: 5000)
+If you want, I can create the local git commit now and show the exact `git` commands to push to your GitHub repo.
